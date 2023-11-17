@@ -1,0 +1,105 @@
+changes are made to 002PythonProject
+
+
+    Getting an error as py4j.protocol.Py4JError: org.apache.log4j.LogManager.getlogger does not exist in the JVM
+Ignore for now
+
+We already learned that every Spark program will start a driver. And then, the driver is going to start the executors for doing most of the work.
+So, the first thing in a Spark program is to create a SparkSession object, which is your Spark Driver.
+Well, it is an overwhelming statement, and one can debate if the Spark Session is the driver or the main() method itself is the driver.
+However, things are going to make a good sense if you start looking at your Spark Session as your driver.
+So, I am going to follow this notion. SparkSession is your driver. And I will explain it many times.
+When you start the spark-shell or the notebook, they create a Spark Session for you and make it available as a variable named spark.
+However, when you are writing a spark program, then you must create a SparkSession because it is not already provided.
+Creating a SparkSession is straightforward. You will declare a variable and use SparkSession.builder.getOrCreate(). That's all. You got your SparkSession object, and we often name it as the spark.
+SparkSession is a Singleton object, so each Spark application can have one and only one active spark session. And that makes a perfect sense because the SparkSession is your driver, and you cannot have more than one driver in a spark application.
+Spark is a highly configurable system, and hence your SparkSession is also highly configurable. However, I haven't used any configurations yet.
+ spark = SparkSession.builder \
+    .appName("Hello Spark") \
+    .master("local[3]") \
+    .getOrCreate()
+Let's add some configs. The builder method returns a Builder object, which allows you to configure your SparkSession and finally use the getOrCreate(). Some configurations, such as AppName, and Master are the most commonly used configs by almost every application. So, we have direct methods to specify them.
+However, we also have some overloaded config () methods for all other configurations.
+Let me define the application name. We also want to set the cluster manager, and we
+already learn that the cluster manager config is defined as a spark master. Right? I am
+going to use local multithreaded JVM with three threads. Great! So we created a Spark
+session, and that means we created our spark driver. We will be using this driver to do
+some data processing, and once we are done with it,
+
+	spark.stop()
+
+we should stop the driver. That's
+how a typical spark program is structured. In the earlier lecture, we configured log4j
+for this project. Right? However, we still don't know How to use log4j to create log
+entries. Let's do it now.
+
+in the new lib folder under the project
+create logger.py
+I want to create a new Class for handling log4J and expose
+simple and easy to use methods to create a log entry. So, let me create a new Python
+package. Let's name it as lib. Then, we will create a python file. I will name it as
+logger.py. Now, I am creating a new class Log4j and define a constructor. Now, what do
+we want to do? Simple, I want to get the log4j instance from the spark session's java
+virtual machine. This is how you can get a JVM object. Now, I will create a logger
+attribute and initialize it with the log4j.LogManager.getLogger(). That's all. We have
+the logger, and we can use this logger to log the messages. But to make things more
+simple, let me define some easy to use methods. I can create one method for warning.
+What do we need to do? Simple, pass on the message to the logger's warning method.
+Similarly, we can create methods for info, error, and debug. We are almost done except
+for one thing. Let me take you back to the log4j properties file. Do you remember this
+name?
+
+guru.learningjournal.spark.examples
+
+I configured my log4j to use this as the logger name. So, my logger should be
+targeting this name, and then only all this configuration will work. How to target this
+name?
+root_class ="guru.learningjournal.spark.examples"
+self.logger = log4j.LogManager.getlogger(root_class)
+
+
+Simple, Pass this name to your logger. That's all. You can even create a variable
+for this name and pass in the variable. This looks better. Right? You can also go one step further to append the application name here. So the idea is to use your
+organization name as the root class and suffix it with the application name. The log4j
+configuration works as long as the base name matches.
+
+self.logger = log4j.LogManager.getlogger(root_class+"."+"002PythonProject")
+
+However, I do not want to
+hardcode the application name. Well, I have an easy solution.
+
+ conf = spark.sparkContext.getConf()
+ app_name = conf.get("spark.app.name")
+ self.logger = log4j.LogManager.getlogger(root_class+"."+app_name)
+
+I have this spark
+session. So, I can go to the Spark Context and get the configs. Once I have the
+configs, I can query the spark.app.name and use the result to set the logger name. The
+value of spark.app.name comes from here. We are setting it here, which goes in the
+spark configs. Great! So we defined a log4j class.
+  logger = Log4J(spark)
+
+  logger.info("Starting hello spark")
+  logger.info("Starting hello spark")
+
+Now you can get a logger like this.
+Once you have the logger, you can use it wherever you want. I am going to put one info
+message in the beginning. And one more at the end. That's all. This program is doing
+only one thing. Creating a Spark driver that starts, does nothing, and stops. Let me
+run it. Oops! Let me fix this. Okay. Some of you might see this Py4JNetworkError. This
+may happen due to socket error between Spark JVM and Py4J. I will talk about the Py4J
+in a separate video. However, you can comment this spark.stop method and move on with
+your learning. Great! We got these log messages to the console. Starting Spark and
+Finished Spark. I also got this warning, but that's fine, you can ignore it. If you
+look at your project explorer, you will also notice this app-logs directory. Do you
+remember this directory name? We configured our log4j file appender to create log files
+in this directory, right? And here is the log file. If you compare this log file with
+the console log, you are going to notice a visible difference. The log file is
+configured to show log entries coming from my package only. It is clean and gives me
+only those things that I want to see. It does not contain cluster level or noisy
+entries coming from other spark and Hadoop packages. These logs are super valuable when
+you want to investigate problems while running your application on a real distributed
+cluster. I will give you a demo for the same in a later video. So, in this video, we
+learned to create and stop the Spark session, or you can say, we learned to create and
+stop the spark driver. That's all for this video. I am going to extend this code
+further in the next lecture. See you again. Keep Learning and Keep Growing.
