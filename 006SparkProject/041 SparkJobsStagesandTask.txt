@@ -1,0 +1,65 @@
+41. Spark Jobs Stages and Task
+==============
+
+Spark Transformations and Actions are going to result in an Execution Plan.
+And this execution plan is finally executed by the executors. In this
+lecture, I am going to elaborate on the execution plan. So, let's start. Let's
+come back to our example code. So what are we doing here? We are doing three
+things. I am reading a data file and also inferring the schema. Right? The
+result is a DataFrame. Then I am applying a chain of transformations.
+The result is another DataFrame. Right? Finally, we are using the action.
+Now, based on this example, we want to understand the internal execution plan.
+How are these things executed internally? That's not an easy goal.
+Why? Because Spark is similar to a compiler. It takes your straightforward
+code and compiles it to generate low-level Spark code and also creates
+an execution plan. All those things are too complicated, and understanding what
+is internally happening is difficult. But let me try giving you some good
+sense about it. We are going to make some changes to this code and prepare
+ourselves to learn a tough topic. The first thing is to move these
+transformations to a separate function. Let me create a function in utils.py inside lib. Now I am going to move this code to the function. Then I am going to call the function here. Great! Now it looks clean, and we can also write unit test cases for this function in the next lecture.
+
+The next thing is to replace this show() action with the collect() action and manually print the outcome to the application log. Why is this needed? Well, I have two reasons.
+
+The collect action returns the DataFrame as Python List. However, the show() method is
+a utility function to print the DataFrame. So, you are more likely to use the collect()
+action, whereas the show() is useful for debugging purposes. Right? The second reason
+The show() method compiles down to complex internal code. It might create unnecessary
+confusion when we are trying to learn a complex topic. Great! Now let's come to the
+next change. I am reading a small data file having nine records. It is stored on my
+local machine. So, I already know that I do not have multiple file partitions. So when
+I load this file, I am going to get a DataFrame of a single partition. Right? And
+that's not good for learning real internal behavior or unit testing my code locally.
+Right? I want to simulate multiple partitions. So, I am going to take my initial
+
+DataFrame and repartition it. The repartition() is a transformation. So it takes a
+DataFrame as input and produces another DataFrame. Now, this new DataFrame should have
+two partitions, and we are going to use this partitioned DataFrame for the rest of the
+transformations. Great! What is next? We already know that we are applying a wide
+dependency transformation groupBy. So, the groupBy is going to result in an internal
+repartitioning caused by the shuffle/sort (which usually is like it creates a parttition for each group and easy to perform any function like count or sum or anything per group). Right? We started our transformation chain
+on a DataFrame, which we forcefully repartitioned to make sure that we get two
+partitions. However, we do not know how many partitions will result after the
+shuffle/sort. But we want to control this behavior, so we understand what we are doing
+and don't get confused by the default behavior. How to do this? Well, we can control it
+
+using a configuration. Let me add it. So, the spark.sql.shuffle.partitions is going to
+set the number of shuffle/sort partitions. What does it mean? Simple. The shuffle/sort
+caused by the groupBy will result in only two partitions. So, we made sure that the
+whole transformation flow is accomplished with two partitions. Neither more nor less at
+any stage. Right? Now the last thing. We are going to execute this example locally and
+look at the execution plan using the Spark UI. I already introduced you to the Spark UI
+in our earlier videos. Right? And you learned that the Spark UI is only available
+during the life of the Application. So, I am going to ask for the user input here. this
+line will make sure that our program does not finish. and we can look at the Spark UI,
+right? But don't forget to remove this line later. This line is for local debugging and
+not for production. Great! We are done and now ready to understand the execution plan.
+Let me execute it once and show you the Spark UI. Great! So we got the output. Let's
+jump to the Spark UI. It should be available at localhost:4040 Here it is. The Spark UI
+
+comes with multiple tabs. The first tab shows you the list of Spark Jobs. For our
+simple example, we got three jobs. Starting from zero, one, and two. Now each job is
+broken down into stages. The first and second job has got only one stage each. But the
+third one is a three-stage job. So we have a total of 5 stages altogether. Right? One
+plus one plus three. Total five. You can see the list of all five stages in this next tab. These stages are again broken down into tasks. So, stage 0-2 has got one task each. However, stage-three and four are broken down into two tasks each. Right? Here is the overall pictorial representation of my Spark Application. My application code is compiled down into three jobs. These jobs are again broken into five stages. And then, these stages are further split into seven tasks. Right?
+
+So the point is straightforward. Your Spark Application will internally generate a bunch of Jobs, Stages, and tasks. And these tasks are the unit of work that is finally assigned to executors. However, you might be wondering how this all happened? I mean, Can we map our code with this diagram. Can we understand how my code translates into these tasks? And that's the topic for the next video. So in this video, we learned the following things. How to structure our code How to control the number of partitions How to hold your program so you can investigate the Spark UI And finally, I introduced you to Spark Jobs, Stages, and Tasks. In the next lecture, We are going to dig further into these jobs, stages, and tasks. See you again. Keep Learning and Keep Growing.

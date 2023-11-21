@@ -1,0 +1,60 @@
+What We learnt so far
+
+
+I am going to quickly recap everything that we learned so far.
+
+This recap is going to help you consolidate your learning and help you consume the rest
+of the course more effectively. So, let's start. You learned about the notion of a data
+lake and five main components of the data lake. You also learned about the role of
+Apache Spark in the data lake. Then I explained the Spark ecosystem and talked about
+the three layers of Apache Spark.
+
+You also learned about installing Apache Spark on
+your local machine and use it from command line REPL.
+Then I helped you to setup and
+configure your IDE for spark development.
+You also learned about some other development
+environments, such as Databricks Notebook and Zeppelin Notebook.
+I gave you a full demo
+for configuring and using all these environments, and I am assuming that you learned to
+use them.
+
+All of this was covered in the first two sections as your Spark getting
+started.
+Then we started going a little deeper into the Spark Architecture. You learned
+two methods of executing your Spark application. Interactive client method for
+exploration And a backed job running in the data lake for production scenarios Then we
+learned about the notion of driver and executor. The idea of the driver and the
+executor is one of the most fundamental concepts of Spark architecture. And I hope you
+got this clear. The next important concept was to learn about the Cluster Managers and
+the Deployment modes. And I hope you got the main idea behind the cluster mode and the
+client mode. It is all about your driver's location. Right? We didn't stop there but
+also learned about the combination of Cluster Manager and Cluster Modes. I talked about
+when to use which combination, and I also gave you a demo for all meaningful
+combinations. Right? That's where we ended the section three and entered into the
+current section of this course. The main agenda of this section was to deep dive
+further into Spark Application architecture and also learned a few critical things to
+make your life easy as a Spark developer. So we learned the following items to help you
+get a pleasant and comfortable experience as Spark developer. Creating and Configuring
+Spark Project using your IDE Configuring Log4J for your Spark Application Creating and
+Configuring Spark Session Managing your Spark Session Configurations using spark.conf
+Creating a modular Structure for your Spark Application Unit Testing Spark Application
+Building and packaging your Spark Application Deploying your Spark Application on a
+Cluster Collecting Application Logs from the Cluster Along with these developer
+experience topics, we also learned the following Spark Architecture topics. We extended
+the concept of driver and executor, and you also learned about the Spark Session I also
+talked about how your Spark Session Configs are propagated to the Spark Session Then I
+spoke about the notion of distributed data structure using the Spark Data Frames and
+partitions. We finally mapped the idea of partitions to the concept of executors. I
+also talked about the Spark Transformations, Actions, Wide, and narrow Transformations.
+You learned the idea behind the shuffle/sort and partition data exchange. Then you also
+learned how your Spark code is compiled, and it is internally arranged into a DAG of
+Jobs, Stages, and Tasks. I explained that each action results in at least one job, and
+then these jobs are broken down into stages for each shuffle. These stages are executed
+as parallel tasks depending upon the number of partitions and availability of executor
+core. I mean, even if you have 100 partitions for a stage but you have only 10 executor
+cores. In such cases, the spark can run a maximum of 10 parallel tasks, and the rest of
+the tasks are queued, waiting for free executor core. Right? Great! I hope you learned
+all these ideas clearly, and now you are ready to directly jump into Spark APIs. I
+mean, Spark transformations and actions. In the next section, we will learn a bunch of
+Spark Transformations, actions, and how to use them to solve your data crunching problems. See you again. Keep Learning and Keep growing.

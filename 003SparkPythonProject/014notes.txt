@@ -1,0 +1,87 @@
+Spark session configuration
+=============================
+So, let's start. Apache Spark is a highly configurable system, and Spark allows you to set those configurations using four different methods.
+Environment variables
+====================
+The first approach is to set environment variables that your Spark application will read and infer some information. We have already seen this. We defined SPARK_HOME, HADOOP_HOME, and PYSPARK_PYTHON.
+The environment variables are mostly ignored by the developers except few that are required for you to set up your local development environment.
+And it is mainly used by the cluster admins.
+SPARK_HOME\conf\spark-defaults.conf
+spark-defaults.conf file
+===========================
+We used this file to configure some JVM variables such as log4j configuration file, log file location, and name. However, this file is to set some default configurations for all the applications and used by your cluster admins. This method of configuring your Spark application is also ignored by developers, and we use this occasionally for our local development environment.
+
+3. spark-submit command line options
+4. SparkConf object
+
+The third and fourth method is for developers. Now let me talk about the spark-submit. We have already used spark-submit in an earlier video. Spark-submit allows you to configure your application using command-line options such as --master.  Similarly, spark-submit can also accept any Spark config using the --conf flag.
+
+C:\Users\Student\Desktop\Personal\DataBricks\spark-3.2.4\bin>
+spark-submit --master local[3] --conf "spark.app.name=Hello spark" --conf spark.eventlog.enabled=false HelloSpark.py
+If you have a space in your config, then you must enclose it in double-quotes. Otherwise, the double quote is not necessary.
+
+SparkConf object
+===========
+spark = SparkSession.builder \
+    .appName("Hello Spark") \
+    .master("local[3]") \
+    .getOrCreate()
+
+The fourth and last method is to code the configurations in your application. We used this method also. Here it is. I am setting appName() and master(). You can set these from the command line using spark-submit, or you can set them from here, in your application code. It's not only appName() and master().
+conf = SparkConf()
+conf.set("spark.app.name","Hello spark")
+conf.set("spark.master","local[3]")
+spark = SparkSession.builder \
+    .config(conf=conf) \
+    .getOrCreate()
+
+
+
+You can set whatever config you want. Let me show you. Create a SparkConf object. Now, you can use the set() method to set the application name config. You can set as many configs as you want. However, you must know the actual config property name string. For example, the spark application name config string is "spark.app.name." Similarly, "spark.master" is the string config name for the spark master. You can refer to https://spark.apache.org/docs/latest/configuration.html#application-properties  for a list of all available spark configs. Once you have your SparkConf ready with all the desired configs, you can pass it to the session builder.
+
+
+Now, you might be wondering which one to use? What if we set the same config from two places? Which one takes precedence? Let me explain. When you run your spark application on your local machine, or you submit it to the Spark cluster, in both the case, your application will read the environment variable, spark-defaults, and the command-line options.
+Spark will combine all these configs and create a single set of initial configs which go to your application and sit in your Spark Session.
+In all this, environment variables are given the lowest precedence, then comes the spark-defaults and finally the command-line options.
+
+
+environment variables << spark defaults conf file << spark submit command line << sparkConf object in the program
+
+So, if you have something defined in the spark-defaults and the same config is also set via the command line Spark will overwrite the spark default config with the Spark submit config. Make sense? Finally, all these initial configs can be overwritten by you from your application code. So, setting the Spark configurations from your application code gets the highest precedence.
+
+However, we still have one question? When to use which method? Should I use spark-defaults, or the command line or the spark conf in my application? Here is the thumb rule.
+
+Leave the environment variables and spark-defaults for your cluster admins. Do not make your application dependent on these two methods of setting configurations.
+So you should be using either command line or spark conf.
+
+Further, Spark properties can be grouped into two categories.
+The first category is for deployment-related configs such as spark.driver.memory, and spark.executor.instances.
+This kind of config is going to depend on which cluster manager and deploy mode you choose.
+So, we often set them through the spark-submit command line and avoid setting them from the application.
+The other category of configs is to control the Spark Application runtime behavior such as spark.task.maxFailures. So, we often set them through SparkConf. There is no clear boundary between these two categories, but I follow a simple thumb rule.
+
+Look at the Spark submit help. Wherever you see specially named flags, such as --master, --driver-memory, --num-executors, etc. You should be using them with the spark-submit,
+and rest all configs are the right candidate for SparkConf.
+However, different architects may have their own rules and choices.
+
+conf.set("spark.master","local[3]")
+
+
+Now let's come back to our application code. So, we are setting these configurations. However, I still see one problem. All these configurations are hardcoded in my application. In some cases, you may want to avoid hard-coding specific configs and keep it outside your application code. or example, hardcoding the master is a big problem.
+
+While developing and debugging my application, I want to use the local master.
+However, once my application is ready, I want to deploy it in a cluster environment. And I don't know yet if I am going to use it on YARN or on a Kubernetes cluster.
+So, I do not want to hard-code this config.
+How do you deal with this requirement? We have a couple of approaches to handle it.
+The first approach is to keep these configurations in a separate file and load it from the file at run-time. Let me show you. I am creating a Python config file named
+spark.conf.
+
+Now, I can create a section and place my configurations in this file. Let's keep only two configs for now. I am keeping these configs as a key-value pair separated by the '=' symbol. If you have some experience with Python Config Files, you already know this format.
+
+Now come back to your code and create a new python file in the lib package. Let me name it utils.py. I am going to create a new function. This function will load the configurations from the Spark.conf file and return a SparkConf object.
+Let's finish the function body. We will create a new SparkConf object. Read the configs from the file. Loop through the configs and set it to the SparkConf. Finally, return the SparkConf object. So we have a function now. This function reads all the configs from the "Spark.conf" file, set them to the SparkConf object, and return the ready to use SparkConf.
+
+Now, we need to come back to the main and use it in the spark builder dot config method. Done. We fixed the hardcoding problem. Now you can add more and more configs in this spark.conf file, and your application will load it at runtime and use them to configure your SparkSession.
+You can read all your spark configs using the SparkSession.sparkContext.getConf() method. And you can print a debug string.
+
+You learned four methods. However, you will be using the SparkConf, and the spark-submit command line method.
