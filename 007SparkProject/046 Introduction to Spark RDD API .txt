@@ -1,0 +1,65 @@
+
+46. Introduction to Spark RDD API
+
+I am going to talk about Spark RDDs and also create an example to help you understand them better. So, let's start. The term RDD stands for the Resilient Distributed Dataset. What does it mean? Let me explain. An RDD is a dataset. That means they are nothing but a data structure to hold your data records. They are similar to DataFrames because DataFrames are also built on top of the RDDs. However, unlike DataFrames, RDD records are just language-native objects, and they do not have a row/column structure and a schema. So in simple words, RDD is just like a Scala, Java, or a Python collection. You can create an RDD reading your data from a file. However, RDD is internally broken down into partitions to form a distributed collection. Same as DataFrames, they are partitioned and spread across the executor cores so they can be processed in parallel. RDDs are resilient. That means they are fault-tolerant. How? RDDs are fault-tolerant because they also store information about how they are created.
+What does it mean? Let's assume an RDD partition is assigned to an executor core for processing it. In some time, the executor fails or crashes. That's a fault, and you could lose your RDD partition, right? However, the driver will notice the failure and assign the same RDD partition to another executor core.
+The new executor core will reload the RDD partition and start the processing.
+And this can be done easily because each RDD partition comes with the information about how to create it and how to process it. And that's why we call them resilient. That means an RDD partition can be recreated and reprocessed anywhere in the cluster. Great! Now you have an answer to the following question. What is an RDD? Right?
+
+They are similar to DataFrames, but they lack a row/column structure and the schema. Now let's create an example to see how things work. The first thing is to learn to create an RDD. Right? I have this HelloRDD project. I created this project, copying a few things from the earlier example. I have the same sample.csv data file here. However, I have removed the header row from this file to keep it simple. We have the same log4J.properties file. I haven't changed anything in this file. I am not using spark.conf file in this example for keeping it simple. Now let's create a new Python file. We will need a main method as an entry point for the application.
+
+So far, everything is almost the same as we already learned. Right? Now we are ready to play with the RDD APIs. What do we want to do? We want to read the data file and create an RDD. Right? Do you remember the steps that we followed to read a data file and create a DataFrame? Let me refresh it here. Create a SparkConf object Create a Spark Session using your SparkConf Use the spark session to read the data file Here is the code for the same. Right? And this code is written using the modern Spark APIs.
+
+  conf = SparkConf()
+  conf.setMaster("local[3]").setAppName("HelloRDD")
+
+  spark = SparkSession.builder \
+    .config(conf=conf) \
+    .getOrCreate()
+
+
+
+    surveyDF = spark.read \
+        .option("header", "true") \
+        .option("inferSchema", "true") \
+        .csv(data_file)
+
+
+
+We want to use the traditional Spark RDD APIs, which are a little different. Let me show you. The first step is the same. I am creating a new SparkConf object. Then I am setting some basic configurations. The next step is different.
+
+The DataFrame APIs are based on SparkSession.
+
+However, the RDD APIs were based on SparkContext. So if you want to use the RDD API, then you need a SparkContext. Let me create it. You can create a SparkContext and pass on your SparkConf. That's all. Now all the RDD APIs are available through the SparkContext. However, let me comment-out this spark context. I am not going to use this one.
+
+Well, we need the spark context, but I am going to use an alternative method to get the Spark Context.
+Let's create the SparkSession, as we created in the earlier example. We can use the SparkSession builder, set the configs, and getOrCreate(). Good. We got the SparkSession.
+However, we need the SparkContext for using RDD APIs. So, I can get the spark context from the SparkSession.
+SparkSession is a higher-level object which was created in the newer versions of Spark as an improvement over the SparkContext. However, The SparkSession still holds the SparkContext and uses it internally.
+If you want to get the older SparkContext interface, you can get it from the SparkSession. So, I prefer this method instead of separately creating a SparkContext.
+
+Now the third step is to read a data file. Let's do it. We start with the SparkContext and read a text file.
+This method returns an RDD, and each record in the RDD is a line of text from the data file.
+We are reading a text file here. However, the SparkContext comes with a bunch of methods to read a binary file, sequence file, Hadoop file, and object file. So basically, the data reader APIs in RDD were raw and fundamental.
+They didn't allow you to work with commonly used files such as CSV, JSON, parquet, and Avro. However, the RDD APIs were extensible to read any kind of file format. But nothing was available out of the box.
+The DataFrame API comes with a DataFrame Reader interface and out of the box support for a bunch of file formats. Great! So now you got the answer to your question. How to create an RDD?
+
+The next question is this. How to process an RDD?
+RDDs implemented the notion of Transformations and Actions. You already learned them for DataFrames, right? The idea of Transformations and Actions are the same for the RDDs.
+However, RDDs offered only basic transformations such as map(), reduce(), filter(), foreach() etc. Most of the RDD transformations were designed to accept a lambda function and simply apply your custom code to the RDD. So basically, the RDD API leaves all the responsibility in the developer's hand.
+You need to take care of giving a structure to your data, implement your operations, create an optimized data structure, compress your objects, and a lot of other things.
+So the developers are expected to reinvent the wheel.
+The DataFrame APIs improved the situation by offering some commonly used SQL like operations such as select(), where(), groupBy(), etc.
+Now let's apply some transformations on this RDD to get a feel of the complexity. Let me repartition this RDD. Simple! Right? Now I want to process my data records. However, my records are loaded as a line of text. Right? That's what the textFile() method creates. I don't have a schema or a row/column structure. So the first thing is to give a structure to my data record. Let me write the code, and then I will explain it. Great! So what I am doing.
+
+    colsRDD = partitioned_RDD.map(lambda line: line.replace('"','').split(","))
+
+
+I am using the map() transformation. The map() transformation takes a lambda function and calls it in a loop for each line. So in each iteration, I will get a line, and I want to process the line. The processing is simple. I am doing two things. The first thing is to remove the double-quotes. If you look at the data file, I have these double quotes around all the values. And this is a common thing in most of the CSV files. Right? However, I am reading and processing these lines a plain text, so these double quotes are a problem for me. So, I am removing them. Once I remove the double quote, I am splitting the line using the comma delimiter. The result is a list of strings. The input was a line of text, and the output is a List of text. Right? So I got a new RDD of List where I separated each column. Make Sense? So now, I have a row-column structure.
+
+But I also need a schema. Right? I mean, I want to give a name and a data type to each column. So let's create a namedtuple. You can also create a class and use it to define a schema. However, I find it more convenient and quick to use a namedtuple. Let me name it as SurveyRecord.
+
+SurveyRecord = namedtuple("SurveyRecord",["Age","Gender","Country","State"])
+
+
+I am creating only four fields because I need only four. That's all. We have a schema now, and I will be using it to give a structure to my RDD. Now let's process the colsRDD. I will again use the map() method to process each row. So, I am going to create a SurveyRecord object taking only four columns. The result is another RDD of SurveyRecord. Great! So I managed to attach a schema to my RDD and also implemented the select() operation because I selected only four columns. Right? What else? Let me apply a filter. So, I am filtering all the records where the age is less than forty. Now I want to group this record by country and count it. So, the first step is to create a key-value pair. The country becomes the key, and the value is a hardcoded value one. So I got a key/Value RDD. The next step is to use the reduceByKey() method and sum up the hardcoded value one. The result is another key/Value RDD where the key is the country, and the value is the sum of all the values for the country. And that's the count. You can collect the result and push it to your log file. Â  Good. We are done. However, the groupBy implementation on an RDD is not so obvious and might not make sense at first. And that was the challenge we faced using the RDD APIs. We needed to hand-code everything, including regular operations such as grouping and aggregating. The Spark Engine had no clue about the data structure inside the RDD. Neither Spark could look inside your lambda functions. And these two things limited Spark to create an optimized execution plan. Great! That's all about the RDDs. I am not going further into RDDs because they are kind of raw and outdated APIs for Spark Developers. You are not likely to use them. They give you a lot of flexibility, but you may not even find a compelling reason to use them. See you again. Keep Learning and Keep Growing.

@@ -1,0 +1,67 @@
+52. Reading CSV, JSON and Parquet files
+
+
+Welcome Back. You already learned the structure of Spark DataFrameReader API. In this lecture, I am going to create an example and help you discover the mechanics of using it. So, let's start. I have created this new example SparkSchemaDemo. Most of the things are copied from the earlier example. However, I have included three data files in this project. The first one is a CSV file with more than 400K records of flight timing data. The second one is also the same data, but this one is a JSON file. Similarly, I have another version of the same data, but this one is a parquet file. In this example, I want to show you the following. How to use DataFrameReader for CSV, JSON, and Parquet data sources And in the next lecture, I will extend the same example to help you learn the following. Spark Data Types And How to explicitly define a schema for your data Let's start with the first thing. How to use DataFramReder? Here is my Spark Project. I already have some basic setup, and I am not going to repeat it here because you already learned all those things.
+
+Let me use DataFrameReader to read the CSV file. As explained in the earlier video, we start with the spark session and use the read method. The next thing is to specify the data source format. In my case, this is a CSV source. Right? Now I want to give you some necessary options. My CSV file comes with a header, so let me set the header to true. Then I specify the file path. The path could be a file name, or it could be a directory location. Spark DataFramReder is going to read all the files in the given directory. You can even use some wild cards to target specific files. Let me try it. Good. So now we are ready to load the CSV file to a DataFrame. Right? I am not giving any schema, and I am not even asking DataFrameReader to infer the schema.
+ flightTimeCsvDF = spark.read \
+        .format("csv") \
+        .option("header", "true") \
+        .load("data/flight*.csv")
+    flightTimeCsvDF.show(5)
+
+    '''
+    I didnt use inferSchema as true -- so all columns are of string type here
+    | FL_DATE|OP_CARRIER|OP_CARRIER_FL_NUM|ORIGIN|ORIGIN_CITY_NAME|DEST|DEST_CITY_NAME|CRS_DEP_TIME|DEP_TIME|WHEELS_ON|TAXI_IN|CRS_ARR_TIME|ARR_TIME|CANCELLED|DISTANCE|
++--------+----------+-----------------+------+----------------+----+--------------+------------+--------+---------+-------+------------+--------+---------+--------+
+|1/1/2000|        DL|             1451|   BOS|      Boston, MA| ATL|   Atlanta, GA|        1115|    1113|     1343|      5|        1400|    1348|        0|     946|
+|1/1/2000|        DL|             1479|   BOS|      Boston, MA| ATL|   Atlanta, GA|        1315|    1311|     1536|      7|        1559|    1543|        0|     946|
+
+StructType(List(StructField(FL_DATE,StringType,true),StructField(OP_CARRIER,StringType,true),StructField(OP_CARRIER_FL_NUM,StringType,true),StructField(ORIGIN,StringType,true),StructField(ORIGIN_CITY_NAME,StringType,true),StructField(DEST,StringType,true),StructField(DEST_CITY_NAME,StringType,true),StructField(CRS_DEP_TIME,StringType,true),StructField(DEP_TIME,StringType,true),StructField(WHEELS_ON,StringType,true),StructField(TAXI_IN,StringType,true),StructField(CRS_ARR_TIME,StringType,true),StructField(ARR_TIME,StringType,true),StructField(CANCELLED,StringType,true),StructField(DISTANCE,StringType,true)))
+
+'''
+
+
+
+
+Let's see what do I get. Let me show five records of this DataFrame. I also want to know the default DataFrame Schema. So, I will again log the DataFrame schema converted to a simple string. Now let's run it and see what we get. So, it looks like I am reading it correctly. The field name and the expected data in these columns are matching. I cross-checked it. So the DataFrame reader is correctly picking the column names from the header row. However, all of these fields are given a String Datatype.
+
+
+.option("inferSchema","true")
+
+
+What if I inferred the schema? Let's try. So, I am setting the option to infer the
+schema. Let's re-run it. Now it is a little better. My numeric fields are now inferred
+to be an integer. That's what I wanted. However, my date filed is still a string.
+
+
+So the point is straight. You cannot rely on the infer schema option. So you have got
+only two options.
+
+Explicitly specify a schema Or use a data file format which comes
+with the schema. We learn both these options. However, let me create one more DataFrame
+reading my JSON file.
+https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrameReader.json.html#pyspark.sql.DataFrameReader.json
+
+Now the format is JSON. Header goes away because the JSON
+doesn't come with a header row. You may want to keep the inferSchema, but let me check
+the documentation before using it.  Search for the DataFrameReader. Look for the JSON
+method. Good. Here are the JSON options. Search for the infer. I don't see the infer
+schema option. However, we see that the API makes some inferences. So, it looks like
+the JSON format will always infer the schema, and you do not need to give this option.
+Let's come back and remove the infer schema option. Then I change the file name. I also
+want to print the schema. Good. Let me run it, and then we will see what schema was
+inferred. Okay. The JSON format also sorted the column names in alphabetical order. And
+that's fine. However, I do see a similar behavior for inference. My integer columns are
+now BigInt, but my date column is still a string.
+
+
+Now comes the second question. How do
+we fix it? And I already mentioned that you have two options. Explicitly specify a
+schema or  Use a data file format which comes with the schema We also have a parquet data
+file. The parquet is a binary file format and which comes with the schema information
+already included in the data file. So, you do not need to specify the schema
+explicitly. However, your data file should contain the correct schema. Right? I created
+this parquet file purposefully with accurate schema information for all the fields. Let's load it and see if we get an appropriate schema. I will again copy this code. Change the name, Change the format, and also the file name. We will again print the information. Let me run it, and we will look at the result. Great. My parquet file contains the well defined correct schema along with the data. So, the DataFrame reader for the parquet source loaded it with the same schema. Now you can see the int as well as the date field. Right? So the point is straight.
+
+You should prefer using the Parquet file format as long as it is possible. And the parquet file format is the recommended and the default file format for Apache Spark. Your data integration tools might bring the original data source in CSV or in JSON format. However, if you have a choice, then you must be trying to get your data in the Parquet file format. And most of the data integration tools are now supporting to create parquet files. So, I recommend you to stick to parquet files for your Spark data processing. Great! That's all for this video. See you again. Keep Learning and Keep growing.

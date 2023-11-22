@@ -1,0 +1,54 @@
+51. Spark DataFrameReader API
+
+Welcome Back. Apache Spark offers a standardized API interface to work with Data Sources. These APIs have a well-defined format, and a recommend pattern for usage. In this video, I am going to help you understand the basics of using Spark Data Sources. So, let's start. Spark allows you to read data using the DataFrameReader API. You can access the DataFrameReader through the SparkSession via the read method. Here is the general structure of the DataFrameReader API.
+
+
+  DataFrameReader.
+		.format(...)
+		.option("key","value")
+		.schema(...)
+		.load()
+
+
+
+
+And here is an example.
+
+  spark.read \
+		.format("csv")
+        .option("header", "true") \
+       	.option("path","/data/sample.csv")
+		.option("mode","FAILFAST")
+		.schema(mySchema)
+		.load()
+
+
+So, you can get the DataFrameReader using the spark.read method where spark is the SparkSession variable. Right? Once you have the DataFrameReader, you can specify four main things. Format of your data source I am using CSV format because my data files are CSV files. Spark DataFrameReader reader supports several built-in formats such as CSV, JSON, Parquet, ORC, and JDBC.
+
+The DataFrameReader API is extended by the community to support hundreds of external data sources.
+And they offer a separate format for different sources such as Cassandra, MongoDB, XML, HBase, Redshift, and many more.
+
+So the point is straight. You can use the Spark DataFrameReader API to read data from any data source, which is supported by Spark or by the community developers.
+And all of those are going to use the same set of API and the structure. I will show you some other examples to help you grab this standardized structure.
+
+The next thing is to specify the options. Every data source has a specific set of options to determine how the DataFrameReader is going to read the data.
+The header option in this example is specific to CSV format. For other formats, you must look into the documentation of the data source. I will show you some other formats. The third most important thing is the Read Mode. You can specify the Mode via the option method itself. But what is the Mode?
+Reading data from a source file, especially the semi-structured data sources such as CSV, JSON, and XML, may encounter a corrupt or malformed record. Read modes specify what will happen when Spark comes across a malformed record. Spark allows three read modes.
+
+permissive dropMalformed and failFast
+The permissive Mode is the default option. This Mode sets all the fields to null when it encounters a corrupted record and places the corrupted records in a string column called _corrupt_record.
+
+The dropMalformed is going to remove the malformed record. That means, you are ignoring the malformed records and only loading the well-formed records.
+
+Finally, the fail-fast raises an exception and terminates immediately upon encountering a malformed record.
+
+The last thing is the schema. The schema is optional for two reasons. DataFrameReader allows you to infer the schema in many cases. So, if you are inferring the schema, then you may not provide an explicit schema. Some data sources such as Parquet and AVRO comes with a well-defined schema inside the data source itself. So, in those cases, you do not need to specify a schema. Once you are done setting the format, all necessary options, Mode, and schema, you can call the load() method to read the data and create a DataFrame. This is a standard structure.
+
+
+  spark.read \
+        .option("header", "true") \
+        .option("inferSchema", "true") \
+        .csv(data_file)
+
+
+However, like any other tool, DataFrameReader also comes with some shortcuts and variations. We have already seen one such shortcut in the earlier examples. Do you remember? Instead of using the load method, we used the CSV() method. Right? That was a shortcut. However, I recommend avoiding shortcuts and follow the standard style. Following the standard is going to add to your code maintainability. Isn't it? Great! So you learned the basic structure of the DataFrameReader API. You have already used the CSV data source for DataFrameReader. In the next lecture, I am going to help you learn the JSON data source and also cover more details about setting your schema. See you again. Keep Learning and Keep growing.

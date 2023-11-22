@@ -1,0 +1,43 @@
+45. Introduction to Spark APIs
+
+
+Welcome Back. In this lecture, I am going to give you a high-level overview of the Spark data processing APIs, and we will elaborate them further in the rest of the section. So, let's start. Apache Spark started with the goal of simplifying and improving the Hadoop Map/Reduce programming model.
+
+To achieve this goal, Spark came up with the idea of RDD - Resilient Distributed Dataset.
+The notion of RDD was revolutionary, and it created the core foundation of Apache Spark.
+However, Spark didn't stop at the RDD and came up with a higher level of APIs such as Dataset APIs and DataFrame APIs. To simplify our life, they also came up with the Â SQL layer and a catalyst optimizer. So, all these Spark data processing tools can be visually arranged as the following figure.
+
+in the top layer Spark sql, dataframe api , dataset api
+in the middle layer is catalyst optimizer
+in the bottom layer is RDD APIs
+
+
+
+
+
+So what does it mean? Simple! The RDD is at the core. You can use RDD APIs to develop your applications.
+However, it is the most challenging tool to learn and use.
+They offer you some additional flexibility, but they lack all the optimization brought to you by the catalyst optimizer. I will give you some more details about RDD in a separate video and help you get a reasonable understanding of the RDDs.
+However, the Spark community is not recommending to use RDD APIs.
+
+
+The next one is the catalyst optimizer. So we write code using Spark SQL, DataFrame APIs, and Dataset APIs. This code is then submitted to Spark for execution. You learned some of it in the earlier section, right? However, the code passes through the Catalyst Optimizer, which decides how it should be executed and lays out an execution plan. I already talked about the execution plan in the earlier lecture.
+However, I will elaborate it further in this section and help you understand some optimizations applied by the Catalyst Optimizer.
+
+Finally, the Spark SQL, DataFrame APIs, and Dataset APIs are your preferred choices. I recommend you to prefer them in left to right order.
+
+I mean, Spark SQL is the most convenient option to use.
+
+So, you should prefer using it wherever applicable. I will cover implementing Spark SQL in a separate video. The Spark SQL is excellent, and it can do a lot of the work for you.
+
+However, a single SQL expression or even a SQL script with a series of SQLs may not be helpful in many scenarios.
+You do not get some necessary facilities like debugging, implementing application logs, unit testing, and other obvious capabilities that a programming language brings on the table.
+Right? So you will be using Spark SQL to catch some low hanging fruits.
+However, a sophisticated data pipeline is going to push you to use DataFrame APIs and rely more on your favorite programming language.
+
+And that's where the DataFrame APIs are your obvious choice. Most of this course is focusing on DataFrame APIs, and I will cover enough details about them. The last one is the Dataset API.
+The Dataset APIs are the language-native APIs in Scala and Java. What do I mean by language native? Well, that is simple. These APIs are strongly typed objects in your JVM based language such as Scala.
+And they are not at all available in dynamically typed languages such as Python. So, we are going to skip the Dataset APIs in this course. If you want to use Dataset APIs then you must use a JVM based language such as Scala or Java. Great! I hope you now have a high-level picture of the different types of APIs.
+
+In the rest of the section, I am going to elaborate on following things. We will be creating an example to help you understand the Spark RDD APIs. You have already seen DataFrame API example so we will skip that in this section. And move on to the Spark SQL example.
+The SQL example will enable you to use Spark SQL in your Spark applications. Finally, I will talk about the Spark SQL Engine and the Catalyst Optimizer. This section is going to help you navigate through the overall Spark API toolset except Dataset. We are skipping Dataset APIs because they are not available to Python programmers. However, rest of the course is focused on using DataFrame APIs and we will be going more deeper into the DataFrames. See you again. Keep Learning and Keep Growing.

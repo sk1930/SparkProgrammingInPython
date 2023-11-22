@@ -1,0 +1,58 @@
+53. Creating Spark DataFrame Schema
+
+
+Welcome Back. In the earlier lecture, we learned to load data from a CSV, JSON as well as Parquet file. However, we also noticed that the schema inference doesn't work well for CSV and JSON. In this lecture, I am going to talk about explicitly setting Schema for your DataFrames.
+
+DataFrame schema is all about setting the column name and appropriate data types. However, you should also know the Spark supported data types. So, let's try to understand the Spark Types before we talk about the Schema.
+
+Apache Spark comes with its own data types. Here are the ten most commonly used types. However, you can find the full list in the
+https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/data_types.html
+
+
+https://spark.apache.org/docs/1.6.0/api/java/org/apache/spark/sql/types/package-summary.html
+
+
+S. No.
+Spark Types				Scala Types				Python Types
+1.IntegerType				Int						Int
+2.LongType						Long				long
+3.FloatType						Float					Float
+4.DoubleType					Double					Float
+5.StringType					String					String
+6.Datetype					java.sql.Date			datetime.date
+8.TimestampType				java. sq. Timestamp			datetime. datetime
+9.ArrayType				scala.collection.Seq			List, tuple, or array
+10.МарТуре				scala.collection.Map				dict
+
+
+org.apache.spark.sql.types package. If you are using Scala, they simply correspond to their equivalent Scala Types. In Python, they correspond to equivalent Python types.
+
+However, we define Spark DataFrame schema using the Spark Types. You might be wondering
+why Spark maintains its own types. Why don't we simply use the language-specific types?
+Well, there is a valid reason for this. Spark is like a compiler. It complies with the
+high-level API code into low-level RDD operations. Right? And during this compilation
+process, it generated different execution plans and also performed a bunch of
+optimizations. This all is not at all possible for the Spark engine without maintaining
+its own type of information. And this approach is not new. Every SQL database would
+have a set of SQL data types. Right? Similarly, Spark also works on Spark data types.
+
+
+
+Make Sense? Great! Now that you learned about the Spark types.
+
+Let's move on to the Schema. Spark allows you to define Schema in two ways. Programmatically and Using DDL String The second method is is much simpler and easier. However, let's learn both techniques.
+
+
+I reopened the SparkSchemaDemo example, I am going to use the Programmatic method.
+
+A Spark DataFrame Schema is a StructType which is made up of a list of StructField. The StructField takes two mandatory arguments. The first one is a column name, and the second one is the data type.
+
+So, The StructType represents a DataFrame row structure, and the StructField is a column definition. Right? Now you can use this Schema to load your CSV file to a DataFrame and comment out the inferSchema option. However, we still keep the header option because we want to skip the first row in the CSV file. If you look at the schema structure, I am using three Spark Types. DateType, StringType, and IntegerType If the types in the data do not match the Schema at runtime, Spark should throw an error. However, you must set the mode for getting the error. So, let me fix it. Good. I defined the Schema correctly, and I am not expecting any error. However, let's run it once and check it. Oops. I got an exception. What is the error? DateTimeParseException
+
+So, Spark DataFrameReader is not able to parse the FL_DATE field as DateType. How do I fix it? Well, the CSV source requires you to define the date format pattern. And it takes a java.text.SimpleDateFormat pattern. So, My date string can be defined using the "M/d/y". Let's try it again. Amazing. My data looks good. And the Schema is also perfect. The date field is now a Date. So you learned to define and use the Schema.
+
+
+
+
+
+Now let's try the DDL string to define the Schema. Here it is. The Schema DDL is straightforward. All you need is the column name and data type separated by a comma. And you can use this Schema in the same way as a Programmatically defined schema. Let me use it for the JSON source. You also need the dataFormat. Let me run it. Great! It works. Right? See you again. Keep Learning and Keep Growing.
