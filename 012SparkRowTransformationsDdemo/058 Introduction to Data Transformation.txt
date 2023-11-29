@@ -1,0 +1,22 @@
+
+58. Introduction to Data Transformation
+Welcome Back. So far, in this course, we covered a lot of things about Apache Spark.
+
+However, the whole point of Data Engineering in Apache Spark is to be able to read the data, apply a series of transformations, and write it back for consumption. We already learned about reading and writing. And we dedicate this section to talk about the transformations.
+
+
+So, let's start with the most basic question. What do we mean by transformations? I am not going to define this term. We will try to get a general sense of it. So, In Spark, we read the data and create one of the two things. DataFrames or Database Tables.
+
+Both of these are the same but two different interfaces. The DataFrame is the programmatic interface for your data, and the database table is the SQL interface of your data. Make sense? Now when we talk about the transformations, we again have two approaches. A programmatic approach that we apply on DataFrames. SQL expressions that we can use on the Database Tables. SQL is straightforward. And I am assuming you already know it.
+
+However, we need to learn the programmatic approach for doing similar things, which you can easily do using the SQL expressions And then we can take it to the next level where you have more flexibility in your hand to go beyond the straightforward SQL expressions. Great! So we again come back to the initial question. What do we mean by transformations? Here is the list to answer this question.
+
+1. Combining one or more DataFrames using operations such as Join and Union
+2. Aggregating and summarizing your DataFrames using operations such as grouping, windowing, and rollups
+3. Applying functions and built-in transformations on your DataFrame such as filtering, sorting, splitting, sampling, and finding unique.
+4. Using and implementing built-in functions, column-level functions, and user-defined functions
+5. Referencing Rows/Columns and
+6. creating custom expressions
+
+
+With these capabilities in your hand, you should be able to cover most of your transformation requirements. And that's what we are going to cover in this section. I have listed these things in the top-down order. However, we will be learning them in the bottom-up order. Great! See you in the next lecture. Keep Learning and Keep Growing.

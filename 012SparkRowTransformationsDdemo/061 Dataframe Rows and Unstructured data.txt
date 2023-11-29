@@ -1,0 +1,55 @@
+61. Dataframe Rows and Unstructured data
+
+
+
+Welcome Back! In an earlier lecture, I talked about the three scenarios when you may have to directly work with the Row objects.
+1. Manually creating Rows and Dataframe
+2. collecting DataFrame rows to the driver
+3. Work with an individual row in spark transformations
+
+
+We already covered the first two scenarios. I this video, I am going to cover the third scenario. So, let's start. Spark DataFrame offers a bunch of Transformations functions.
+
+agg (*exprs)
+select (*cols)
+cov (col1, co12)
+sort (*cols, **kwargs)
+crosstab (co11, co12)
+where (condition)
+cube (*cols)
+withColumn (colName, col)
+filter (condition)
+avg (*cols)
+groupBy (*cols)
+max (*cols)
+join (other, on=None, how=None)
+mean (*cols)
+orderBy (*cols, **kwargs)
+
+replace (to_replace, value, subset)
+min (*cols)
+rollup (*cols)
+sum (*cols)
+
+You will be using these methods when your DataFrame has got a schema. What if you do not have a proper schema? When your DataFrame doesn't have a column structure, you will take an extra step to create a columnar structure.
+And then use your transformation functions. In those cases, you may have to start working with the row only and then transform it into a columnar structure. Let's create an example to help you grab the idea.
+
+
+I created this LogFileDemo example. Most of the things are similar to other examples.
+
+data/apache_logs.txt
+
+However, I have this unstructured data file. Let me show you. The data file is an apache web server log file. Each line in this file is one log entry. We do have some patterns in the log output. However, this file is not even a semi-structured data file. It is just a log dump. So if you read this file in a DataFrame, all you are going to get is a Row of strings. You cannot have columns because the data file is an unstructured data file. How to deal with these scenarios? We are going to parse this data file and extract some fields. Let's do it. Same as earlier, I created this main entry point and also created the SparkSession. Now I am going to create a DataFrame and read the text file. The text file gives me a DataFrame[String].
+Let's print the schema and see what do we get. So, I have a DataFrame. And the DataFrame Row has got only one string field named value. That's all. No other columns and schema. Right?
+I cannot use many of the higher level transformations such as aggregation and grouping. So what can we do? We need to find a way to extract some well-defined fields from the data. Can we use some regular expressions here? Let's look at the data once.
+
+Every entry in this log follows a standard apache log file format. It comes with the following information.
+
+IP, client, user, datetime, cmd, request, protocol, status, bytes, referrer, userAgent.
+
+We can extract all these fields using a regular expression.
+
+    log_reg = r'^(\S+) (\S+) (\S+) \[([\w:/]+\s[+\-]\d{4})\] "(\S+) (\S+) (\S+)" (\d{3}) (\S+) "(\S+)" "([^"]*)'
+
+
+Here it is. This regex is going to match against eleven elements in a given string. And I will be using this regex to extract the fields. Let's do it. We start with the DataFrame and use the select() method. I am going to use the regexp_extract() function. This function takes three arguments. The first argument is the field name or the source string. We just have one field. Right? The second argument is the regular expression. So this regular expression will extract all eleven fields. But I am only interested in some of them. Let's take the first field, which is an IP address. Then we take the fourth one, which is date-time. Then we take the request and finally the referrer. That's all. Great! What did we achieve? We created a new DataFrame. This new DataFrame has got four fields. Right? Let me print the schema. I am going to run it once and see what do we get? Great! So we got four fields. That's what we wanted. My initial DataFrame had a single string field but no schema. Now I got a new DataFrame with four fields. Now it is quite simple to perform some kind of analysis on this data frame. Let me show you some simple analysis here. Now I have this DataFrame. Right? I can easily group by the referrer, take a count, and show it. Let me run it. Okay! So this count doesn't make a good sense. I mean, these three URLs are the same referrer. However, they are aggregating as three different websites. How can I fix it? Simple. I will transform this referrer column taking only the website's home URL. Here is the code. However, you might be wondering about this column transformation. We haven't learned these things yet. I am going to explain column level transformation starting from the next video. So nothing to worry. I am using it here to show you the benefits of having a schema for your DataFrame. Let me run it once. Here are 4K plus hits that are not coming from any referrer. If you want, you can filter them out. Here is the code. Great! The point is straight. I started with an unstructured dataset. Then I used a regular expression in the select() transformation. I used it to give a structure to my data and attach a schema. Once I have a schema, I can easily use column transformations to do a lot of things. If I do not have a schema, then the simple stuff like groping and counting is going to become a tough thing. So, the point is straight. Dataframe APIs can be used to operate on unstructured data as well. However, before using most of the DataFrame transformations, you may have to give an appropriate schema to your unstructured data frame. Great! That's all for this video. See you again. Keep Learning and Keep Growing.

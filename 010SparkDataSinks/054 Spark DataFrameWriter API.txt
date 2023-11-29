@@ -1,0 +1,99 @@
+54. Spark DataFrameWriter API
+
+
+Welcome Back. We already learned to work with a variety of Spark data sources.
+In this lecture, I am going to give you an overview of Spark data sinks API.
+So, let's start. Spark allows you to write data using DataFrameWriter API. The DataFrameWriter is a standardized API to work with a variety of internal and external data sources.
+
+
+General structure
+
+DataFrameWriter.format(...)
+.option(...)
+.partitionBy(...)
+.bucketBy(...)
+.sortBy(...)
+.save()
+
+
+
+example:
+DataFrame.write
+	.format("parquet")
+	.mode(saveMode)
+	.option("path","/data/fligts/")
+	.save()
+
+
+
+
+
+Here is the general structure of the DataFrameWriter API. And here is an example. So, you can get the DataFrameWriter using the write method on any of your DataFrame. Once you have the DataFrameWriter, you can specify four main things. The first and the most important thing is the output format. Spark supports a bunch of internal file formats such as CSV, JSON, Parquet, AVRO, ORC, etc. However, Parquet is the default file format. So, DataFrameWriter assumes Parquet when you do not specify the format.
+These are the internal Spark file-formats bundled with your Spark.
+However, you also have a bunch of formats offered by the community developers and third-party vendors.
+Some of the popular ones are JDBC, Cassandra, MongoDB, Kafka, and Delta Lake.
+
+The next thing is to specify the options. Every data sink has a specific set of options to determine how the DataFrameWriter is going to write the data.
+
+However, at a minimum, you must specify the target of your DataFrame. For a file-based data sink, such as Parquet, it should be a directory location.
+
+The next one is the save mode.
+
+1.append
+2.overwrite
+3. errorIfExists
+4.ignore
+
+Save modes specifies what will happen when Spark finds existing dataset at the specified location.
+
+We have four valid modes.
+
+The append mode will create new files without touching the existing data at the given location.
+
+The overwrite will remove the existing data files and create new files
+
+errorIfExists, will throw an error when you already have some data at the specified location.
+
+The ignore will write the data if and only if the target directory is empty and do nothing if some files already exist at the location.
+
+
+Finally, the most important thing is to control the layout of your output data. It means to control the following items.
+
+Number of files and file size
+Organizing your output in partitions and buckets
+Storing sorted data
+
+
+Let me explain.
+
+DataFrames are partitioned. Right? So, when you write your DataFrame to the file system, you are going to get one output file per partition. That's the default behavior, and it is perfectly fine because each partition is written by an executor core in parallel. Make Sense? However, the default behavior may not be suitable for your requirements. So, you can tweak it. How? We have a bunch of ways. The simplest option is to repartition your DataFrame before you write it. Correct? Now the next question?
+
+How do we repartition? So we have three different ways to repartition your data to write it to the sink.
+
+
+DataFrame.repartition(n)
+The first option is to do the Simple Repartitioning and you already learned it. You can use the DataFrame.repartition() transformation. This transformation will repartition your data, and you can control the number of output files.
+However, this could be a blind repartitioning. Right? This blind repartitioning is not going to help you in most of the situations.
+
+
+DataFrameWriter.partitionBy(col1,col2)
+
+The second option is to use a partitionBy() method. The partitionBy() method will repartition your data based on a key column. You can use a single column key such as country code, or you can use a composite column key such as country code plus state code. Key-based partitioning is a powerful method to break your data logically. It also helps to improve your Spark SQL performance using the partition pruning technique.
+
+
+DataFrameWriter.bucketBy(n,col1,col2)
+
+The third option is to partition your data into a fixed number of predefined buckets. And this is known as bucketing. You can use the bucketBy() method.
+
+However, the bucketBy() is only available on Spark managed tables. You will learn managed tables and more on bucketBy() in a separate lecture.
+
+
+I will also cover partitionBy() with appropriate examples.
+
+
+However, as of now, you know that we have two logical partitioning options. partitionBy() and BucketBy(). Great!
+
+
+We have two more suitable options to learn here. sortBy() and maxRecordsPerFile The sortBy() method is commonly used with the bucketBy(). This option allows you to create sorted buckets. I will cover it with the bucketBy() example.
+
+MaxRecordsPerFile is an option. This option allows you to limit the number of records per file. You can use this option with or without partitionBy(). Basically, the maxRecordsPerFile helps you to control the file size based on the number of records and protect you from creating huge and inefficient files. Great! That's all for the DataFrameWriter overview. I am going to elaborate on all these things using appropriate examples in further lectures. See you again. Keep Learning and Keep Growing.

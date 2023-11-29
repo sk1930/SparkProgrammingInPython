@@ -1,0 +1,49 @@
+55. Writing Your Data and Managing Layout
+
+
+
+Welcome Back. In the previous lecture, we learned some basics of DataFrameWriter. In this lecture, I am going to create one example and help you understand the mechanics of using DataFrameWriter.
+So, let's start. I created this new example project named DataSinkDemo. Most of the things are again copied from the earlier project.
+
+I have this log4j.properties file and the lib package. However, we are going to create Avro output in this example. Spark AVRO doesn't come bundled with Apache Spark, so if you want to work with Avro data, then you must include an additional Scala package in your project.
+We are working in Python IDE and it doesn't offer you a method to include Scala or Java dependencies. Right? How do we handle it? You already learned it earlier. Remember the spark-defaults.conf file. Let me open. We used this file to configure some Java System variables. Right? You can use the same file to add some Scala packages.
+
+he used
+spark.jars.packages      org.apache.spark:spark-avro_2.11:2.4.5
+
+
+am using
+
+spark.jars.packages      org.apache.spark:spark-avro_2.12:3.2.4
+
+
+
+Let me do it. So, this configuration tells that we want some jars to be included in our Spark application dependencies. And this is the jar that we need. It is Spark Avro, for Scala 2.11 and Spark 2.4.5. That's all. Save this file and you are done. Now you can read and write avro files using your PySpark code.
+
+
+Let's come back to the IDE. Rest all in this project is the same as earlier projects. I have this parquet data file, which I am going to use as a data source and we will be creating an Avro file after processing the source data. I have also created this DataSinkDemo.py file. I have the main() method, which creates a SparkSession and reads the data source. You already learned all this. Now, what do I want to do? I am not going to do any kind of data processing in this example. We will simply write this DataFrame using the DataFrameWriter API and learn the mechanics. However, in a real scenario, you will be processing your source data, and then you are going to write the output to a sink. Right?
+
+
+So let's write this DataFrame as an Avro output. We start with the DataFrame and use the write() method to get the DataFrameWriter. Then we set the format. And then the save mode. I am going to use the overwrite mode. The next most important thing is to set the output directory path. Finally, we call the save() method. Good. We are done.
+What do you expect when I execute it? This code is going to create one or more Avro files in the given directory.
+However, before writing to the directory location, this API call is also going to clean up the target directory because we are working in overwrite mode. Make Sense? The save() method in an overwrite mode is a two-step process. Clean the directory and write the new files. So, be careful while using the overwrite mode.
+
+I have one more question. How many Avro files do you expect? One, two, or ten? Well, you already learned. It depends upon the number of DataFrame partitions. So, if this DataFrame has got five partitions, you can expect five output files, and each of those files will be written in parallel by five executers.
+
+If you have three executors and five partitions, then they are going to share the five partitions among three executors. So it could be 2+2+1. Right? But how many partitions do I have? Let me check the number of partitions.
+
+We convert the DataFrame to an RDD and get the number. Great! Let me run it. So. Here is my output directory. You can see three types of files here. The AVRO file is the data file. You also have this CRC file, which holds the data file checksum. And the SUCCESS file indicates that the write operation was successful. I got two partitions. However, I have only one AVRO file. So what went wrong? I was expecting two Avro files because I have two partitions here. Right? We have a small gotcha. We counted the number of partitions, but we do not know how many records do we have in each partition. Let me count the number of rows for the partitions. Here is the code.
+I am grouping the DataFrame on the partition-id and then taking a count. Simple. Right? However, I am using a built-in function to get the partition id. So, I need to import the function. Let me execute it once again. So, the partition-id zero has got all the records, and we do not see any other partition-id here.
+We do have two partitions, but it doesn't show up because the second partition has got nothing. And that is why I got only one output file. Make Sense?
+
+partitioned_DF = flightTimeParquetDF.repartition(5)
+Now let's repartition it and see if we get multiple files. Let me force it to make five partitions. We will again take a count. And this time, I am going to write the partitioned DataFrame. Let me Execute. Great! So now you can see that the repartition worked and I got five equal partitions. And I also got five output files. Simple! Isn't it. However, partitioning your data to equal chunks may not make a good sense in most of the cases.
+We do want to partition our data because we will be working with massive volumes.
+And partitioning our data might get us two types of direct benefits.
+
+Parallel Processing and
+Partition Elimination
+
+for certain read operations. The random but equal partitions will give you parallel processing benefits. However, they do not help in partition elimination. So, you might want to partition your data for specific columns.
+
+And that is where you can use the partitionBy() method. Let's do it. I am commenting on this part of the code and going to create a new DataFrameWriter expression. This time I want to use the JSON format. We still use the overwrite mode. Specify the directory location. And finally, I want to partition the output on two columns. The first column is the flight carrier, and the second column is the flight origin. Great! So what do you expect now? The DataFrameWriter will partition this DataFrame using these two columns. What does it mean? Let me execute it, and then I will explain. Well, repartitioning on a given column requires shuffling all the records. So, it is going to take some time. Done. Let's look at the output directory. So, my dataset had ten different flight carriers. And I got one directory for each carrier. Now, if you are reading this dataset and want to filter it only for one carrier such as HP. Then your Spark SQL engine can optimize this read and filter operation, ignoring other directories and only reading the HP directory. Now let's go inside one of these directories. Great! So we have a second level of directories. And this is caused by the second column in the partitionBy() method. So, The carrier AA has got these many origins. And each origin becomes a subdirectory. If you go inside these directories, then you will see the data file. So the point is straight. Your data is partitioned by the unique combination of your partition columns. And these partitions are written down in a separate directory. Each data file in these directories will hold data only for the given combination. For example, this data file contains 1400 plus records, and all these records are for carrier=AA and origin=BOS. In fact, those two columns are not even recorded in the data file. Because that would be redundant information. Right? If you look at the directory name, these are named as carrier=AA, and origin=BOS and these two columns are removed from the data file. Make sense? Great! We played with a small data source of nearly 400K records. After partitioning them on these two columns, I got files that could be of reasonable size, and I am not expecting a too large file here. Let me show you. So my largest data file is roughly 4 MB. And this one is created for OP_CAREER=DL and ORIGIN=ATL. In fact, a 4MB file is too small for Spark. In real scenarios, you should have a much larger file. I prefer managing file sizes between 500 MB to a couple of GBs. Not too big and not too small. But how can you control the file size here? You learned it already. Right? maxRecordsPerFile. Let me apply that option. I am going to limit the file for 10K records only. But before we rerun, let's look at the largest file once. So, I am going to OP_CAREER=DL and ORIGIN=ATL. We have this one data file here, and it contains approximately 19K records. With this new maxRecordsPerFile option, I am expecting this file to split. Right? Let's run it. Done. Let me check. So you can see two data files. Right? Great! So we learned the following things in this video. How to write your data frame. And you can choose whatever format you prefer. However, the parquet is the recommendation. We also learned to partition the data and organize your output files the way it makes more sense for your use cases. We also learned to control the file size from growing too big. That's all for this video. See you again. Keep learning and keep growing.

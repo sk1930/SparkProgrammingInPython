@@ -1,0 +1,40 @@
+60. DataFrame Rows and Unit Testing
+
+Welcome Back! In the previous lecture, I talked about the three scenarios when
+you may have to directly work with the Row objects. We already covered the
+first scenario. In this video, I am going to extend the earlier example and
+cover the second scenario. So, let's start. I have taken the Notebook code from
+the earlier lecture and converted it to a Spark Project. Here it is.
+
+RowDemo.py
+========
+So I have
+this RowDemo object and the main method. I am creating SparkSession. Creating
+the schema and manually creating the DataFrame. Here is my function, which we
+created in the earlier lecture. And I am testing it also. Let me run it. It
+works. Right? I am manually observing the results, and I know my function
+behaves correctly.
+
+
+
+RowDemoTest.py
+
+However, we want to convert this thing to an automated unit
+test. How can you do that? Let me explain. Let's create a new Python file. We
+are going to create a TestCase using the Python unit test framework So, let me
+import it. How do we start? Create a class and inherit the TestCase. We have
+already done a similar exercise in an earlier video. Right? For unit testing
+
+our code, we will be setting up the Spark Session and DataFrame. So, let me
+create a class method setUpClass. The rest is simple. I will create a
+SparkSession. We need a schema. I will create a list of rows. Create an RDD. Then we convert it to a DataFrame. That's all. I am done with the essential requirements. Now I have a Spark Session, and I also have a DataFrame that I can use in all my tests. Now I am going to create two test cases.
+
+
+In the first test case, I will be validating the data type. And in the second test case, I am going to validate the data itself. Let me create the first test case. We are going to call the function.
+
+to_date_df()
+
+
+This function will return a DataFrame. However, the actual data of a DataFrame is sitting at the executor. The DataFrame is just a reference to the real data. The point is straight. You cannot assert the DataFrame. If you want to validate the data, then you must bring it to the driver. How? Simple. Collect it. The collect() method will return List[Row] to your driver.
+
+Once your data is at the driver, you can assert it. Let's do it. You can iterate over the rows. Each iteration will give you a Row, and I am going to assert the Row. So, I am validating it for an isInstanceOf[Date]. Make sense? This is what I wanted to test. I am expecting my function to return a DataFrame where the EventDate is converted to the DateType. Right? Let's do the next one. Here also, I am going to call my function and collect it as a List of Row. We will again loop through the List and assert each record. What do I want to assert? The Date value. Right? Nice! We are done. Let me run these test cases. Great! Both tests are passing. See you again. Keep Learning and Keep Growing.

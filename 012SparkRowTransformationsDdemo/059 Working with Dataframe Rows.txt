@@ -1,0 +1,39 @@
+59. Working with Dataframe Rows
+
+
+Welcome Back. Data transformation is all about playing with your DataFrame rows and columns.
+However, working with a row and column is not that straightforward.
+
+In this video, I am going to take you a little deeper into the rows, and we will talk about the columns in the upcoming lecture. So, let's start.
+
+Spark DataFrame is a Dataset[Row]. Right? And each row in a DataFrame is a
+single record represented by an object of type Row. Most of the time, you do
+not directly work with the entire row. However, we have three specific scenarios when you might have to work with the Row object. Here are them.
+
+1. Manually creating Rows and DataFrame.
+2. Collecting DataFrame rows to the driver.
+3. Work with an individual row in Spark Transformations.
+
+
+The first two scenarios are mostly used in unit testing or during development. Let me explain with a simple example. However, I want to use the DataBricks cloud for doing this. Why DataBricks Cloud? Well, I want you to be a little more familiar with the DataBricks Cloud environment. No other specific reason. We already learned to create a DataBricks Community Cloud account. Right?
+
+Login to your DataBricks Cloud account and create a new cluster.
+Give a name to your cluster, select your Spark Version, and create it.
+
+Good. Now you need a notebook. Let me create a new notebook. Give a name to your notebook. Select your preferred language and create it. Now I am ready to write some code and run it from here. Let's assume I am a spark developer, and I created a function.
+
+DataFrame.withColumn(colName, col)[source]
+
+Parameters:
+colNamestr
+string, name of the new column.
+
+colColumn
+a Column expression for the new column.
+
+def to_date_df(df, fmt, fld):
+    return df.withColumn(fld, to_date(df[fld], fmt))
+
+
+
+Here it is. This function takes a DataFrame, date format string, and a field name. Then it simply returns a new DataFrame converting the type of the field using a given date format. So, let's assume that the input DataFrame is something like this. And the output DataFrame is expected to be like this. The data type of the EventDate is a string, which is converted to a DateType in the output DataFrame. Now I want to test my function if it works well. Right? Let me import some necessary packages. Your IDE is good at automatically importing things. However, you must take care of these things while working with the Notebooks. Good. Here is my function. How do I test it? I need a DataFrame so I can pass it here and test it. Right? One approach is to create a data file with some sample data. Then you can load it here to create your DataFrame and use that DataFrame to test your function. However, this approach of loading a DataFrame from a file and executing your test cases has got the following problems. A large project might need hundreds of small sample data files to test your functions. This could be difficult to manage over some time. Your build pipeline might run slow due to loading hundreds of sample files and increased I/O. The point is straight. You will be using sample data files for testing your application. However, we prefer to use a well crafted and limited number of sample data files to check some of the critical business scenarios. However, for testing such functions, we are going to create a DataFrame on the fly. Let's do it. A DataFrame requires a schema. So, let me create a schema. Then I create a List of Row Objects. Your list is not distributed. It is a single list with four records. Right? So, I am going to convert it to an RDD of two parallel partitions. Now, you can use this RDD and the Schema to create a DataFrame. Great! So you have your DataFrame. What else? Nothing! Now I can test my function. Let me print the before status. Then I am going to call my function. Finally,y I will print the after state. Let's run it. Great! So My before DataFrame shows a String filed. And the after DataFrame shows a DataType filed. Data also looks good. I have exported this notebook as HTML and attached it to your lecture resources. However, all of this was manual verification. Can you convert it to a Unit test? That's the topic for the next video. See you again. Keep Learning and Keep growing.
